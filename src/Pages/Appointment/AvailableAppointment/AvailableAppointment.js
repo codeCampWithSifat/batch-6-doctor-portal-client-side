@@ -1,19 +1,35 @@
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import BookingModal from "../BookingModal/BookingModal";
 import AppointOption from "./AppointOption";
 
 const AvailableAppointment = ({ selected }) => {
-  const [appointOptions, setAppointmentOptions] = useState([]);
+  // const [appointOptions, setAppointmentOptions] = useState([]);
   const [treatment, setTreatment] = useState(null);
 
-  useEffect(() => {
-    fetch("services.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setAppointmentOptions(data);
-      });
-  }, []);
+  const { data: appointOptions=[] , isLoading } = useQuery({
+    queryKey: ["appointmentOptions"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:5000/appointmentOptions");
+      const data = await res.json();
+      return data;
+    },
+  });
+
+  if (isLoading) {
+    <div className="h-[800px] flex justify-center items-center">
+      <button className="btn loading ">loading</button>
+    </div>;
+  }
+
+  // useEffect(() => {
+  //   fetch("http://localhost:5000/appointmentOptions")
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setAppointmentOptions(data);
+  //     });
+  // }, []);
   return (
     <section className="mt-20">
       <p className="text-center text-indigo-600 font-bold text-xl">
@@ -30,8 +46,10 @@ const AvailableAppointment = ({ selected }) => {
       </div>
       {treatment && (
         <BookingModal
-         setTreatment={setTreatment}
-         selected={selected} treatment={treatment}></BookingModal>
+          setTreatment={setTreatment}
+          selected={selected}
+          treatment={treatment}
+        ></BookingModal>
       )}
     </section>
   );
