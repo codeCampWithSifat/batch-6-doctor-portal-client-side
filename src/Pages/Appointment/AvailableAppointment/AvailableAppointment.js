@@ -7,20 +7,22 @@ import AppointOption from "./AppointOption";
 const AvailableAppointment = ({ selected }) => {
   // const [appointOptions, setAppointmentOptions] = useState([]);
   const [treatment, setTreatment] = useState(null);
-
-  const { data: appointOptions=[] , isLoading } = useQuery({
-    queryKey: ["appointmentOptions"],
+  const date = format(selected, "PP");
+  const { data: appointOptions , isLoading , refetch } = useQuery({
+    queryKey: ["appointmentOptions", date],
     queryFn: async () => {
-      const res = await fetch("http://localhost:5000/appointmentOptions");
+      const res = await fetch(`http://localhost:5000/appointmentOptions?date=${date}`);
       const data = await res.json();
       return data;
     },
   });
 
   if (isLoading) {
-    <div className="h-[800px] flex justify-center items-center">
-      <button className="btn loading ">loading</button>
-    </div>;
+    return (
+      <div className="h-[800px] flex justify-center items-center">
+        <button className="btn loading ">loading</button>
+      </div>
+    );
   }
 
   // useEffect(() => {
@@ -49,6 +51,7 @@ const AvailableAppointment = ({ selected }) => {
           setTreatment={setTreatment}
           selected={selected}
           treatment={treatment}
+          refetch={refetch}
         ></BookingModal>
       )}
     </section>

@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import { toast } from "react-hot-toast";
 import { AuthContext } from "../../../context/AuthProvider";
 
-const BookingModal = ({ treatment, selected, setTreatment }) => {
+const BookingModal = ({ treatment, selected, setTreatment, refetch }) => {
   const { name: treatmentName, slots } = treatment;
   const date = format(selected, "PP");
   const { user } = useContext(AuthContext);
@@ -30,22 +30,24 @@ const BookingModal = ({ treatment, selected, setTreatment }) => {
     // and display the toast
 
     fetch("http://localhost:5000/bookings", {
-      method : "POST",
-      headers : {
-        "Content-Type" : "application/json"
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      body : JSON.stringify(booking)
+      body: JSON.stringify(booking),
     })
-    .then(res => res.json())
-    .then(data => {
-      console.log(data)
-      if(data.insertedId) {
-        setTreatment(null);
-        toast.success("Booking Confirm")
-      }
-    })
-
-    console.log(booking);
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data.acknowledged) {
+          setTreatment(null);
+          toast.success("Booking Confirmed");
+          refetch();
+        } else {
+          toast.error(data.message);
+          
+        }
+      });
   };
   return (
     <>

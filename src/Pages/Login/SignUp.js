@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from '../../context/AuthProvider';
+import useToken from '../../hooks/useToken';
 
 const SignUp = () => {
     const {
@@ -14,6 +15,12 @@ const SignUp = () => {
       const {createUser,  updateUser} = useContext(AuthContext);
       const [signUpError, setSignUpError] = useState("");
       const navigate = useNavigate();
+      const [createdUserEmail, setCreatedUserEmail] = useState("")
+      const [token] = useToken(createdUserEmail);
+
+      if(token) {
+        navigate("/")
+      }
     
       const handleSignUp = (data) => {
         console.log(data);
@@ -29,7 +36,8 @@ const SignUp = () => {
             }
             updateUser(userInfo)
             .then(() => {
-              navigate("/")
+              savedUser(data.name, data.email);
+              
             })
             .catch(error => {
                 console.log(error);
@@ -43,6 +51,34 @@ const SignUp = () => {
             console.log(errorMessage);
         })
       };
+
+      const savedUser = (name, email) => {
+        const user = {name, email};
+        fetch(`http://localhost:5000/users`, {
+          method : "POST",
+          headers :  {
+            'Content-Type' : "application/json"
+          },
+          body : JSON.stringify(user)
+        })
+        .then(res => res.json())
+        .then(data => {
+          setCreatedUserEmail(email)
+          console.log("saved user in the database",data);
+        })
+      };
+
+
+      // const getUserToken = (email) => {
+      //   fetch(`http://localhost:5000/jwt?email=${email}`)
+      //   .then(res => res.json())
+      //   .then(data => {
+      //     if(data.accessToken) {
+      //       localStorage.setItem("accessToken",data.accessToken)
+      //       navigate("/")
+      //     }
+      //   })
+      // }
   return (
     <div className="h-[800px] flex justify-center items-center">
     <div className="w-96">
